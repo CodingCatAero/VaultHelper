@@ -1,0 +1,3 @@
+#!/bin/bash
+
+curl # Add url to raw file

@@ -1,0 +1,160 @@
+#!/bin/bash
+
+TerminalLines=$(($(tput lines)-5))
+TerminalColumns=$(($(tput cols)-20))
+
+MinimumLines=20
+MinimumColumns=50
+
+if [[ $TerminalLines -lt $MinimumLines ]];
+then
+    TerminalLines=$MinimumLines
+fi
+
+if [[ $TerminalColumns -lt $MinimumColumns ]];
+then
+    TerminalColumns=$MinimumColumns
+fi
+
+timeout 0.2 whiptail --msgbox "" 1 1
+
+# Initializes the path to both the encrypted vaults and their mount point, if none exist
+if [[ ! -d $HOME/.config/VaultHelper ]];
+then
+    mkdir "$HOME/.config/VaultHelper"
+fi
+
+acknowledgementInitialize() {
+    if [[ ! -f $HOME/.config/VaultHelper/vaultpath.txt ]];
+    then
+        VaultPath=$(whiptail --title "Vault Path Error" --inputbox "No vault path found. Press <Ok> to accept default path, otherwise, enter the path to your ENCRYPTED vaults" \
+        $TerminalLines $TerminalColumns "$HOME/.local/share/plasma-vault/" 3>&1 1>&2 2>&3)
+
+        echo "$VaultPath" > "$HOME/.config/VaultHelper/vaultpath.txt" 
+    fi
+
+    if [[ ! -f $HOME/.config/VaultHelper/vaultmount.txt ]];
+    then
+        VaultMount=$(whiptail --title "Vault Mount Path Error" --inputbox "No vault mount path found. Press <Ok> to accept default path, otherwise, enter the path you wish to use to MOUNT your vaults" \
+        $TerminalLines $TerminalColumns "$HOME/Vaults/" 3>&1 1>&2 2>&3)
+
+        echo "$VaultMount" > "$HOME/.config/VaultHelper/vaultmount.txt"
+    fi
+
+    if [[ ! -f $HOME/.config/VaultHelper/passwordshare.txt ]];
+    then
+        if whiptail --title "Vault Password Sharing" --yesno "Do all of your vaults share the same password?" $TerminalLines $TerminalColumns 3>&1 1>&2 2>&3;
+        then
+            echo "yes" > "$HOME/.config/VaultHelper/passwordshare.txt"
+        else
+            echo "no" > "$HOME/.config/VaultHelper/passwordshare.txt"
+        fi
+    fi
+}
+
+prepareVaultList() {
+    VaultCheckMenu=()
+    WarnUser=0
+
+    for directory in "$VaultPath"*/ ;
+    do
+        for vault in "$directory"*.conf* ;
+        do
+            if [[ $vault =~ $"*.conf*" ]] ;
+            then
+                WarnUser=1
+            else
+                FullVaultPaths+=("$vault")
+            fi
+        done
+    done
+
+    if [[ $WarnUser == 1 ]];
+    then
+        whiptail --title "Warning against using EncFS" --msgbox "This script has found a directory that isn't cryfs or gocryptfs. If this is because the vault is encrypted with EncFS, then I advice you use gocryptfs instead" \
+        $TerminalLines $TerminalColumns 
+    fi
+
+    for vault in "${FullVaultPaths[@]}" ;
+    do
+        VaultCheckMenu+=("${vault##"$VaultPath"}" "" "NO")
+    done
+
+    eval "FullVaultPaths=($(whiptail --title "Operations" --checklist "Select (With <Space>) which vaults you'd like to open" $TerminalLines $TerminalColumns $((TerminalLines - 8)) "${VaultCheckMenu[@]}" 3>&1 1>&2 2>&3))"
+}
+
+unlockSelectedVaults() {
+
+    VaultPassword=""
+
+    for vault in "${FullVaultPaths[@]}";
+    do
+        # ## means to remove the leading substing which matches the supplied regex.
+        # %% means to remove the trailing substring which matches the supplued regex.
+
+        if [[ $vault =~ $"gocryptfs.conf" ]] ;
+        then
+            VaultProgram="gocryptfs ${vault%%/gocryptfs.conf[[:space:]]*} ${vault##*[[:space:]]}"
+        else            
+            VaultProgram="cryfs ${vault%%/cryfs.config[[:space:]]*} ${vault##*[[:space:]]}"
+        fi
+
+        printf '\r' | $VaultProgram
+
+        response=$?
+
+        if [[ $response == 10 ]];
+        then
+            whiptail --title "Vault can't mount" --msgbox "Looks like ${vault##*[[:space:]]} has already been mounted, or there's files present which are blocking it from being mounted. This program will continue assuming the vault has already been mounted" $TerminalLines $TerminalColumns
+        fi
+
+        while [[ $response == 12 || $response == 11 ]];
+        do  
+            if [[ -z $VaultPassword || "$PasswordShare" == "no" ]] ;
+            then
+                VaultPassword=$(whiptail --title "Please Enter Password" --passwordbox "Please enter the password for a vault, or vaults if you chose the \"shared password\" option." $TerminalLines $TerminalColumns "" 3>&1 1>&2 2>&3)
+            fi
+
+            echo "$VaultPassword" | $VaultProgram
+            response=$?
+
+            if [[ $response == 12 || $response == 11 ]];
+            then
+                VaultPassword=""
+            fi
+        done
+    done
+}
+
+
+
+acknowledgementInitialize
+
+read -r PasswordShare < "$HOME/.config/VaultHelper/passwordshare.txt"
+read -r VaultPath < "$HOME/.config/VaultHelper/vaultpath.txt"
+read -r VaultMount < "$HOME/.config/VaultHelper/vaultmount.txt"
+
+FullVaultPaths=()
+
+prepareVaultList
+
+SelectionNumber=0
+
+while [[ $SelectionNumber == 0 ]];
+do
+    for result in "${FullVaultPaths[@]}";
+    do
+        FullVaultPaths[SelectionNumber]="$VaultPath$result $VaultMount${result%%.enc/*}"
+
+        (( SelectionNumber+=1 ))
+    done
+
+    if [[ $SelectionNumber == 0 ]];
+    then
+        whiptail --title "Vault not selected" --msgbox "No vault was selected on the previous page. Please select a vault" $TerminalLines $TerminalColumns
+    fi
+done
+
+unlockSelectedVaults
+        
+whiptail --title "Thank you!" --msgbox "Thanks for using this script ^o^ \n Hope it's made your day a bit easier" $TerminalLines $TerminalColumns
