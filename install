@@ -6,4 +6,6 @@ mkdir "$HOME/.config/vaultHelper" 2> /dev/null
 
 curl -s https://raw.githubusercontent.com/CodingCatAero/VaultHelper/refs/heads/main/Assets/vaultHelperIcon.png > "$HOME/.config/vaultHelper/vaultHelperIcon.png"
 
+
+
 printf "\nInstalled!!"
