@@ -1,3 +1,7 @@
 #!/bin/bash
 
-curl # Add url to raw file
+curl -s https://raw.githubusercontent.com/CodingCatAero/VaultHelper/main/vaultHelper | sudo tee /usr/local/bin/vaultHelper > /dev/null
+
+mkdir "$HOME/.config/vaultHelper" > /dev/null
+
+# curl -s imgrawurl > "$HOME/.config/vaultHelper/vaultHelperIcon.png"

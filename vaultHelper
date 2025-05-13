@@ -1,0 +1,204 @@
+#!/bin/bash
+
+clearOutVault() {
+    mkdir ~/vaultTempStorage 2> /dev/null
+
+    for file in "$1"/* ;
+    do
+        mv "$file" ~/vaultTempStorage/
+    done
+}
+
+repopulateVault() {
+    mkdir "$1"/tempStorageTransfer 2> /dev/null
+
+    for file in ~/vaultTempStorage/* ;
+    do
+        mv "$file" "$1"/tempStorageTransfer/
+    done
+
+    rm -r ~/vaultTempStorage
+}
+
+acknowledgementInitialize() {
+    # Initializes the path to both the encrypted vaults and their mount point, if none exist
+
+    if [[ ! -f $1/vaultpath.txt ]];
+    then
+        VaultPath=$(whiptail --title "Vault Path Error" \
+        --inputbox "No vault path found. Press <Ok> to accept default path, otherwise, enter the path to your ENCRYPTED vaults" \
+        $TerminalLines $TerminalColumns "$HOME/.local/share/plasma-vault/" 3>&1 1>&2 2>&3)
+
+        echo "$VaultPath" > "$1/vaultpath.txt" 
+    fi
+
+    if [[ ! -f $1/vaultmount.txt ]];
+    then
+        VaultMount=$(whiptail --title "Vault Mount Path Error" \
+        --inputbox "No vault mount path found. Press <Ok> to accept default path, otherwise, enter the path you wish to use to MOUNT your vaults" \
+        $TerminalLines $TerminalColumns "$HOME/Vaults/" 3>&1 1>&2 2>&3)
+
+        echo "$VaultMount" > "$1/vaultmount.txt"
+    fi
+
+    if [[ ! -f $1/passwordshare.txt ]];
+    then
+        if whiptail --title "Vault Password Sharing" --yesno "Do all of your vaults share the same password?" $TerminalLines $TerminalColumns 3>&1 1>&2 2>&3;
+        then
+            echo "yes" > "$1/passwordshare.txt"
+        else
+            echo "no" > "$1/passwordshare.txt"
+        fi
+    fi
+}
+
+prepareVaultList() {
+    VaultCheckMenu=()
+
+    for directory in "$VaultPath"*/ ;
+    do
+        FullVaultPaths+=("$directory")
+    done
+
+    for vault in "${FullVaultPaths[@]}" ;
+    do
+        VaultCheckMenu+=("${vault##"$VaultPath"}" "" "NO")
+    done
+
+    eval "FullVaultPaths=($(whiptail --title "Operations" \
+    --checklist "Select (With <Space>) which vaults you'd like to open"\
+     $TerminalLines $TerminalColumns $((TerminalLines - 8)) "${VaultCheckMenu[@]}" 3>&1 1>&2 2>&3))"
+}
+
+unlockSelectedVaults() {
+    VaultPassword=""
+    vaultProgram=""
+
+    for vault in "${FullVaultPaths[@]}";
+    do
+        # ## means to remove the leading substing which matches the supplied regex.
+        # %% means to remove the trailing substring which matches the supplued regex.
+
+        vaultDestination="${vault##*[[:space:]]}"
+        vaultSource="${vault%%\/[[:space:]]*}"
+
+        for file in "$vaultSource"/*
+        do
+            if [[ $file =~ gocryptfs.conf ]];
+            then
+                vaultProgram="gocryptfs"
+
+            elif [[ $file =~ cryfs.config ]];
+            then
+                vaultProgram="cryfs"
+
+            elif [[ $file =~ .encfs[0-9]+.xml ]];
+            then
+                vaultProgram="encfs"
+            fi
+        done
+
+        if (findmnt | grep "$vaultDestination" > /dev/null);
+        then
+            whiptail --title "Vault already mounted" --msgbox "Looks like $vaultDestination has already been mounted." $TerminalLines $TerminalColumns
+
+        elif [[ -z $vaultProgram ]];
+        then
+            whiptail --title "Unsupported vault" \
+            --msgbox "This vault is unsupported by this program, or is a regular folder where it shouldn't be. Skipping." \
+            $TerminalLines $TerminalColumns
+
+        else
+
+            if [ -n "$(ls -A "$vaultDestination" 2> /dev/null)" ] ;
+            then
+                clearOutVault "$vaultDestination"
+            fi
+
+            response=1
+
+            while [[ $response != 0 ]];
+            do  
+                if [[ -z $VaultPassword || "$PasswordShare" == "no" ]] ;
+                then
+                    VaultPassword=$(whiptail --title "Please Enter Password" \
+                    --passwordbox "Please enter the password for a vault, or vaults if you chose the \"shared password\" option." \
+                    $TerminalLines $TerminalColumns "" 3>&1 1>&2 2>&3)
+                fi
+
+                if [[ $vaultProgram == "encfs" ]];
+                then
+                    $vaultProgram --extpass="echo $VaultPassword" "$vaultSource" "$vaultDestination" > /dev/null    
+                else 
+                    echo "$VaultPassword" | $vaultProgram "$vaultSource" "$vaultDestination" > /dev/null
+                fi
+
+                response=$?
+
+                if [[ $response != 0 ]];
+                then
+                    VaultPassword=""
+                fi
+            done
+
+            if [[ -d ~/tempVaultStorage ]] ;
+            then
+                repopulateVault "$vaultDestination"
+            fi
+        fi
+    done
+}
+
+shopt -s dotglob
+
+TerminalLines=$(($(tput lines)-5))
+TerminalColumns=$(($(tput cols)-20))
+
+MinimumLines=20
+MinimumColumns=50
+
+if [[ $TerminalLines -lt $MinimumLines ]];
+then
+    TerminalLines=$MinimumLines
+fi
+
+if [[ $TerminalColumns -lt $MinimumColumns ]];
+then
+    TerminalColumns=$MinimumColumns
+fi
+
+timeout 0.2 whiptail --msgbox "" 1 1
+
+vaultConfig="$HOME/.config/vaultHelper"
+
+acknowledgementInitialize "$vaultConfig"
+
+read -r PasswordShare < "$vaultConfig/passwordshare.txt"
+read -r VaultPath < "$vaultConfig/vaultpath.txt"
+read -r VaultMount < "$vaultConfig/vaultmount.txt"
+
+FullVaultPaths=()
+
+prepareVaultList
+
+SelectionNumber=0
+
+while [[ $SelectionNumber == 0 ]];
+do
+    for result in "${FullVaultPaths[@]}";
+    do
+        FullVaultPaths[SelectionNumber]="$VaultPath$result $VaultMount${result%%.enc/*}"
+
+        (( SelectionNumber+=1 ))
+    done
+
+    if [[ $SelectionNumber == 0 ]];
+    then
+        whiptail --title "Vault not selected" --msgbox "No vault was selected on the previous page. Please select a vault" $TerminalLines $TerminalColumns
+        prepareVaultList
+    fi
+done
+
+unlockSelectedVaults
+        
+whiptail --title "Thank you!" --msgbox "Thanks for using this script ^o^ \n Hope it's made your day a bit easier" $TerminalLines $TerminalColumns
