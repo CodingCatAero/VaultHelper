@@ -5,3 +5,5 @@ curl -s https://raw.githubusercontent.com/CodingCatAero/VaultHelper/main/vaultHe
 mkdir "$HOME/.config/vaultHelper" > /dev/null
 
 curl -s https://raw.githubusercontent.com/CodingCatAero/VaultHelper/refs/heads/main/Assets/vaultHelperIcon.png > "$HOME/.config/vaultHelper/vaultHelperIcon.png"
+
+printf "\nInstalled!!"
