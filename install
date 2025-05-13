@@ -2,7 +2,7 @@
 
 curl -s https://raw.githubusercontent.com/CodingCatAero/VaultHelper/main/vaultHelper | sudo tee /usr/local/bin/vaultHelper > /dev/null
 
-mkdir "$HOME/.config/vaultHelper" > /dev/null
+mkdir "$HOME/.config/vaultHelper" 2> /dev/null
 
 curl -s https://raw.githubusercontent.com/CodingCatAero/VaultHelper/refs/heads/main/Assets/vaultHelperIcon.png > "$HOME/.config/vaultHelper/vaultHelperIcon.png"
 
