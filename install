@@ -8,4 +8,6 @@ curl -s https://raw.githubusercontent.com/CodingCatAero/VaultHelper/refs/heads/m
 
 curl -s https://raw.githubusercontent.com/CodingCatAero/VaultHelper/refs/heads/main/Assets/vaultHelper.desktop > "$HOME/Desktop/vaultHelper.desktop"
 
+sudo chmod +x /usr/local/bin/vaultHelper
+
 printf "\nInstalled!!"
