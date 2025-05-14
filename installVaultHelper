@@ -13,7 +13,7 @@ sudo printf ""
 if [[ $? ]] ;
 then
     printf "Downloading script to /usr/local/bin/"
-    curl -s https://raw.githubusercontent.com/CodingCatAero/VaultHelper/refs/heads/main/vaultHelper | sudo tee /usr/local/bin/vaultHelper &> /dev/null
+    curl -s https://raw.githubusercontent.com/CodingCatAero/VaultHelper/refs/heads/main/vaultHelper | sudo tee "$HOME/.local/bin/vaultHelper" &> /dev/null
     checkFailure $?
 
     printf "\n\nCreating vaultHelper directory in %s/" "$HOME"
@@ -22,16 +22,16 @@ then
 
     printf "\n\nDownloading icons to /usr/share/icons/hicolor/"
     curl -s https://raw.githubusercontent.com/CodingCatAero/VaultHelper/refs/heads/main/Assets/iconPack.tar.gz > "$HOME/Downloads/iconPack.tar.gz"
-    sudo tar -xf "$HOME/Downloads/iconPack.tar.gz"  --one-top-level=/usr/share/icons/hicolor
+    sudo tar -xf "$HOME/Downloads/iconPack.tar.gz"  --one-top-level=$HOME/.local/share/icons/hicolor
     rm "$HOME/Downloads/iconPack.tar.gz" &> /dev/null
     checkFailure $?
 
     printf "\n\nDownloading desktop file to /usr/share/applications"
-    curl -s https://raw.githubusercontent.com/CodingCatAero/VaultHelper/refs/heads/main/Assets/vaultHelper.desktop | sudo tee /usr/share/applications/vaultHelper.desktop &> /dev/null
+    curl -s https://raw.githubusercontent.com/CodingCatAero/VaultHelper/refs/heads/main/Assets/vaultHelper.desktop | sudo tee "$HOME/.local/share/applications/vaultHelper.desktop" &> /dev/null
     checkFailure $?
 
     printf "\n\nSetting read & executable permissions for the script and desktop file"
-    sudo chmod 555 /usr/local/bin/vaultHelper && sudo chmod 555 /usr/share/applications/vaultHelper.desktop
+    sudo chmod 555 "$HOME/.local/bin/vaultHelper" && sudo chmod 555 "$HOME/.local/share/applications/vaultHelper.desktop"
     checkFailure $?
 
     printf "\n\nInstalled!!"
