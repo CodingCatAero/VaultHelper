@@ -22,10 +22,10 @@ then
             fi
             
             printf "\n\nRemoving vaultHelper script from /usr/local/bin/vaultHelper"
-            sudo rm /usr/local/bin/vaultHelper &> /dev/null
+            sudo rm "$HOME/.local/bin/vaultHelper" &> /dev/null
             printf "\nDone!"
 
-            for dir in /usr/share/icons/hicolor/*/ ;
+            for dir in $HOME/.local/share/icons/hicolor/*/ ;
             do
                 if [[ $dir =~ ([0-9]+)"x"([0-9]+)"/" ]] ;
                 then
@@ -35,8 +35,8 @@ then
                 fi
             done
 
-            printf "\n\nRemoving vaultHelper config from /usr/share/applications/vaultHelper.desktop"
-            sudo rm /usr/share/applications/vaultHelper.desktop &> /dev/null
+            printf "\n\nRemoving vaultHelper desktop file from /usr/share/applications/vaultHelper.desktop"
+            sudo rm "$HOME/.local/share/applications/vaultHelper.desktop" &> /dev/null
             printf "\nDone!"
 
             printf "\n\nUninstalled!"
