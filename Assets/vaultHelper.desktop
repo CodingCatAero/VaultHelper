@@ -1,20 +1,7 @@
 [Desktop Entry]
-Comment[en_AU]=A simple shell script to help with the use of KDE vaults
+Name=VaultHelper
 Comment=A simple shell script to help with the use of KDE vaults
-Comment[en_US]=A simple shell script to help with the use of KDE vaults
 Exec=vaultHelper
-GenericName[en_AU]=
-GenericName=
-GenericName[en_US]=
-Icon=~/.config/VaultHelper/vaultHelperIcon.png
-MimeType=
-Name[en_AU]=Vault Helper
-Name=Vault Helper
-Name[en_US]=Vault Helper
-Path=~
-StartupNotify=true
-Terminal=true
-TerminalOptions=
+Icon=vaultHelper.png
 Type=Application
-X-KDE-SubstituteUID=false
-X-KDE-Username=
+Terminal=true

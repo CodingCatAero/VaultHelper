@@ -1,13 +1,28 @@
 #!/bin/bash
 
-curl -s https://raw.githubusercontent.com/CodingCatAero/VaultHelper/main/vaultHelper | sudo tee /usr/local/bin/vaultHelper > /dev/null
+if [[ $(sudo echo) ]] ;
+then
+    printf "\nDownloading script to /usr/local/bin/"
+    curl -s https://raw.githubusercontent.com/CodingCatAero/VaultHelper/main/vaultHelper | sudo tee /usr/local/bin/vaultHelper > /dev/null
+    echo "Done!"
 
-mkdir "$HOME/.config/vaultHelper" 2> /dev/null
+    printf "\nCreating vaultHelper directory in %s/" $HOME
+    mkdir "$HOME/.config/vaultHelper" 2> /dev/null
+    echo "Done!"
 
-curl -s https://raw.githubusercontent.com/CodingCatAero/VaultHelper/refs/heads/main/Assets/vaultHelperIcon.png > "$HOME/.config/vaultHelper/vaultHelperIcon.png"
+    printf "\nDownloading icons to /usr/share/icons/hicolor/"
+    # curl -s PACKURL > "$HOME/Downloads/iconPack.tar.gz"
+    sudo tar -xf "$HOME/Downloads/iconPack.tar.gz"  --one-top-level=/usr/share/icons/hicolor
+    rm "$HOME/Downloads/iconPack.tar.gz"
+    echo "Done!"
 
-curl -s https://raw.githubusercontent.com/CodingCatAero/VaultHelper/refs/heads/main/Assets/vaultHelper.desktop > "$HOME/Desktop/vaultHelper.desktop"
+    printf "\nDownloading desktop file to %s/Desktop/" $HOME
+    curl -s https://raw.githubusercontent.com/CodingCatAero/VaultHelper/refs/heads/main/Assets/vaultHelper.desktop > "$HOME/Desktop/vaultHelper.desktop"
+    echo "Done!"
 
-sudo chmod +x /usr/local/bin/vaultHelper
+    printf "\nSetting read & executable permissions for the script and desktop file"
+    sudo chmod 555 /usr/local/bin/vaultHelper && sudo chmod 555 $HOME/Desktop/vaultHelper.desktop
+    echo "Done!"
 
-printf "\nInstalled!!"
+    printf "\nInstalled!!"
+fi
