@@ -13,7 +13,7 @@ sudo printf ""
 if [[ $? ]] ;
 then
     printf "Downloading script to /usr/local/bin/"
-    curl -s https://raw.githubusercontent.com/CodingCatAero/VaultHelper/main/vaultHelper | sudo tee /usr/local/bin/vaultHelper &> /dev/null
+    curl -s https://raw.githubusercontent.com/CodingCatAero/VaultHelper/refs/heads/main/vaultHelper | sudo tee /usr/local/bin/vaultHelper &> /dev/null
     checkFailure $?
 
     printf "\n\nCreating vaultHelper directory in %s/" "$HOME"
