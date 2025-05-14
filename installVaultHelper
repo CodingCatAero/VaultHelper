@@ -26,12 +26,12 @@ then
     rm "$HOME/Downloads/iconPack.tar.gz" &> /dev/null
     checkFailure $?
 
-    printf "\n\nDownloading desktop file to %s/Desktop/" "$HOME"
-    curl -s https://raw.githubusercontent.com/CodingCatAero/VaultHelper/refs/heads/main/Assets/vaultHelper.desktop | sudo tee "$HOME/Desktop/vaultHelper.desktop" &> /dev/null
+    printf "\n\nDownloading desktop file to /usr/share/applications"
+    curl -s https://raw.githubusercontent.com/CodingCatAero/VaultHelper/refs/heads/main/Assets/vaultHelper.desktop | sudo tee /usr/share/applications/vaultHelper.desktop &> /dev/null
     checkFailure $?
 
     printf "\n\nSetting read & executable permissions for the script and desktop file"
-    sudo chmod 555 /usr/local/bin/vaultHelper && sudo chmod 555 "$HOME"/Desktop/vaultHelper.desktop
+    sudo chmod 555 /usr/local/bin/vaultHelper && sudo chmod 555 /usr/share/applications/vaultHelper.desktop
     checkFailure $?
 
     printf "\n\nInstalled!!"
