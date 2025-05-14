@@ -128,9 +128,9 @@ unlockSelectedVaults() {
 
                 if [[ $vaultProgram == "encfs" ]];
                 then
-                    $vaultProgram --extpass="echo $VaultPassword" "$vaultSource" "$vaultDestination" > /dev/null    
+                    $vaultProgram --extpass="echo $VaultPassword" "$vaultSource" "$vaultDestination" &> /dev/null 
                 else 
-                    echo "$VaultPassword" | $vaultProgram "$vaultSource" "$vaultDestination" > /dev/null
+                    echo "$VaultPassword" | $vaultProgram "$vaultSource" "$vaultDestination" &> /dev/null
                 fi
 
                 response=$?

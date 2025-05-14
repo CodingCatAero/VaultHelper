@@ -1,0 +1,45 @@
+#!/bin/bash
+sudo printf ""
+
+if [[ $? ]] ;
+then
+    answers=("y" "yes" "Y" "Yes" "YES")
+
+    read -r -p "Are you sure you want to uninstall? [y/N] " choice
+
+    for option in "${answers[@]}" ;
+    do
+        if [[ $option == "$choice" ]] ;
+        then
+            choice=""
+            read -r -p "Would you like to clear the config? [y/N] " choice
+
+            if [[ $option == "$choice" ]] ;
+            then
+                printf "\nRemoving vaultHelper config from %s/.config/vaultHelper" "$HOME"
+                sudo rm -r "$HOME/.config/vaultHelper" &> /dev/null
+                printf "\nDone!"
+            fi
+            
+            printf "\n\nRemoving vaultHelper script from /usr/local/bin/vaultHelper"
+            sudo rm /usr/local/bin/vaultHelper &> /dev/null
+            printf "\nDone!"
+
+            for dir in /usr/share/icons/hicolor/*/ ;
+            do
+                if [[ $dir =~ ([0-9]+)"x"([0-9]+)"/" ]] ;
+                then
+                    printf "\n\nRemoving vaultHelper icon from %sapps/" "$dir"
+                    sudo rm "$dir"apps/vaultHelper.png &> /dev/null
+                    printf "\nDone!"
+                fi
+            done
+
+            printf "\n\nRemoving vaultHelper config from %s/Desktop/vaultHelper.desktop" "$HOME"
+            sudo rm "$HOME/Desktop/vaultHelper.desktop" &> /dev/null
+            printf "\nDone!"
+
+            printf "\n\nUninstalled!"
+        fi
+    done
+fi
