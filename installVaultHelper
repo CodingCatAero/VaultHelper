@@ -27,7 +27,7 @@ then
     checkFailure $?
 
     printf "\n\nDownloading desktop file to %s/Desktop/" "$HOME"
-    curl -s https://raw.githubusercontent.com/CodingCatAero/VaultHelper/refs/heads/main/Assets/vaultHelper.desktop > "$HOME/Desktop/vaultHelper.desktop"
+    curl -s https://raw.githubusercontent.com/CodingCatAero/VaultHelper/refs/heads/main/Assets/vaultHelper.desktop | sudo tee "$HOME/Desktop/vaultHelper.desktop" &> /dev/null
     checkFailure $?
 
     printf "\n\nSetting read & executable permissions for the script and desktop file"
