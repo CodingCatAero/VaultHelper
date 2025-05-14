@@ -1,6 +1,8 @@
 #!/bin/bash
 
-if [[ $(sudo echo) ]] ;
+sudo echo
+
+if [[ $? ]] ;
 then
     printf "\nDownloading script to /usr/local/bin/"
     curl -s https://raw.githubusercontent.com/CodingCatAero/VaultHelper/main/vaultHelper | sudo tee /usr/local/bin/vaultHelper > /dev/null
