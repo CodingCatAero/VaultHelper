@@ -12,21 +12,21 @@ sudo printf ""
 
 if [[ $? ]] ;
 then
-    printf "Downloading script to /usr/local/bin/"
+    printf "Downloading script to %s/.local/bin/" "$HOME"
     curl -s https://raw.githubusercontent.com/CodingCatAero/VaultHelper/refs/heads/main/vaultHelper | sudo tee "$HOME/.local/bin/vaultHelper" &> /dev/null
     checkFailure $?
 
-    printf "\n\nCreating vaultHelper directory in %s/" "$HOME"
+    printf "\n\nCreating vaultHelper directory in %s/.config/" "$HOME"
     mkdir "$HOME/.config/vaultHelper" &> /dev/null
     checkFailure $?
 
-    printf "\n\nDownloading icons to /usr/share/icons/hicolor/"
+    printf "\n\nDownloading icons to %s/.local/share/icons/hicolor" "$HOME"
     curl -s https://raw.githubusercontent.com/CodingCatAero/VaultHelper/refs/heads/main/Assets/iconPack.tar.gz > "$HOME/Downloads/iconPack.tar.gz"
     sudo tar -xf "$HOME/Downloads/iconPack.tar.gz"  --one-top-level=$HOME/.local/share/icons/hicolor
     rm "$HOME/Downloads/iconPack.tar.gz" &> /dev/null
     checkFailure $?
 
-    printf "\n\nDownloading desktop file to /usr/share/applications"
+    printf "\n\nDownloading desktop file to %s/.local/share/applications/" "$HOME"
     curl -s https://raw.githubusercontent.com/CodingCatAero/VaultHelper/refs/heads/main/Assets/vaultHelper.desktop | sudo tee "$HOME/.local/share/applications/vaultHelper.desktop" &> /dev/null
     checkFailure $?
 
