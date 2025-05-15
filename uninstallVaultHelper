@@ -21,7 +21,7 @@ then
                 printf "\nDone!"
             fi
             
-            printf "\n\nRemoving vaultHelper script from /usr/local/bin/vaultHelper"
+            printf "\n\nRemoving vaultHelper script from %s/.local/bin/vaultHelper" "$HOME"
             sudo rm "$HOME/.local/bin/vaultHelper" &> /dev/null
             printf "\nDone!"
 
@@ -35,7 +35,7 @@ then
                 fi
             done
 
-            printf "\n\nRemoving vaultHelper desktop file from /usr/share/applications/vaultHelper.desktop"
+            printf "\n\nRemoving vaultHelper desktop file from %s/.local/share/applications/vaultHelper.desktop" "$HOME"
             sudo rm "$HOME/.local/share/applications/vaultHelper.desktop" &> /dev/null
             printf "\nDone!"
 
