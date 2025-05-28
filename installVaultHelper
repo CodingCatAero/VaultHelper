@@ -22,7 +22,7 @@ then
 
     printf "\n\nDownloading icons to %s/.local/share/icons/hicolor" "$HOME"
     curl -s https://raw.githubusercontent.com/CodingCatAero/VaultHelper/refs/heads/main/Assets/iconPack.tar.gz > "$HOME/Downloads/iconPack.tar.gz"
-    sudo tar -xf "$HOME/Downloads/iconPack.tar.gz"  --one-top-level=$HOME/.local/share/icons/hicolor
+    sudo tar -xf "$HOME/Downloads/iconPack.tar.gz"  --one-top-level="$HOME"/.local/share/icons/hicolor
     rm "$HOME/Downloads/iconPack.tar.gz" &> /dev/null
     checkFailure $?
 
