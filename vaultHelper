@@ -141,7 +141,7 @@ unlockSelectedVaults() {
                 fi
             done
 
-            if [[ -d ~/tempVaultStorage ]] ;
+            if [[ -d $HOME/vaultTempStorage ]] ;
             then
                 repopulateVault "$vaultDestination"
             fi
