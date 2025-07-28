@@ -12,15 +12,19 @@ sudo printf ""
 
 if [[ $? ]] ;
 then
-    printf "Downloading script to %s/.local/bin/" "$HOME"
+    printf "Creating %s/.local/bin/" "$HOME"
+    printf "\n"
+    mkdir "$HOME/.local/bin"
+
+    printf "\nDownloading script to %s/.local/bin/" "$HOME"
     curl -s https://raw.githubusercontent.com/CodingCatAero/VaultHelper/refs/heads/main/vaultHelper | sudo tee "$HOME/.local/bin/vaultHelper" &> /dev/null
     checkFailure $?
 
     printf "\n\nCreating vaultHelper directory in %s/.config/" "$HOME"
-    mkdir "$HOME/.config/vaultHelper" &> /dev/null
-    checkFailure $?
+    printf "\n"
+    mkdir "$HOME/.config/vaultHelper"
 
-    printf "\n\nDownloading icons to %s/.local/share/icons/hicolor" "$HOME"
+    printf "\nDownloading icons to %s/.local/share/icons/hicolor" "$HOME"
     curl -s https://raw.githubusercontent.com/CodingCatAero/VaultHelper/refs/heads/main/Assets/iconPack.tar.gz > "$HOME/Downloads/iconPack.tar.gz"
     sudo tar -xf "$HOME/Downloads/iconPack.tar.gz"  --one-top-level="$HOME"/.local/share/icons/hicolor
     rm "$HOME/Downloads/iconPack.tar.gz" &> /dev/null
