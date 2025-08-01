@@ -15,6 +15,7 @@ then
     printf "Creating %s/.local/bin/" "$HOME"
     printf "\n"
     mkdir "$HOME/.local/bin"
+    checkFailure $?
 
     printf "\nDownloading script to %s/.local/bin/" "$HOME"
     curl -s https://raw.githubusercontent.com/CodingCatAero/VaultHelper/refs/heads/main/vaultHelper | sudo tee "$HOME/.local/bin/vaultHelper" &> /dev/null
@@ -23,6 +24,7 @@ then
     printf "\n\nCreating vaultHelper directory in %s/.config/" "$HOME"
     printf "\n"
     mkdir "$HOME/.config/vaultHelper"
+    checkFailure $?
 
     printf "\nDownloading icons to %s/.local/share/icons/hicolor" "$HOME"
     curl -s https://raw.githubusercontent.com/CodingCatAero/VaultHelper/refs/heads/main/Assets/iconPack.tar.gz > "$HOME/Downloads/iconPack.tar.gz"
@@ -38,5 +40,5 @@ then
     sudo chmod 777 "$HOME/.local/bin/vaultHelper" && sudo chmod 777 "$HOME/.local/share/applications/vaultHelper.desktop"
     checkFailure $?
 
-    printf "\n\nInstalled!!"
+    printf "\n\nInstalled!!\n"
 fi
