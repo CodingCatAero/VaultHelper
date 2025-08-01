@@ -1,7 +1,7 @@
 [Desktop Entry]
 Name=VaultHelper
 Comment=A simple shell script to help with the use of KDE vaults
-Exec=vaultHelper
+Exec=~/.local/bin/vaultHelper
 Icon=vaultHelper.png
 Type=Application
 Terminal=true
