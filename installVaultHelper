@@ -35,7 +35,7 @@ then
     checkFailure $?
 
     printf "\n\nSetting read & executable permissions for the script and desktop file"
-    sudo chmod 555 "$HOME/.local/bin/vaultHelper" && sudo chmod 555 "$HOME/.local/share/applications/vaultHelper.desktop"
+    sudo chmod 777 "$HOME/.local/bin/vaultHelper" && sudo chmod 777 "$HOME/.local/share/applications/vaultHelper.desktop"
     checkFailure $?
 
     printf "\n\nInstalled!!"
