@@ -1,53 +1,71 @@
 #!/bin/bash
+shopt -s dotglob
+
+vaultConfigPath="$HOME/.config/vaultHelper"
+
+TempStorageName="vaultTempStorage"
+passwordShareText="passwordshare.txt"
+vaultMountText="vaultmount.txt"
+vaultPathText="vaultpath.txt"
+
+TerminalLines=$(($(tput lines)-5))
+TerminalColumns=$(($(tput cols)-20))
+
+MinimumLines=20
+MinimumColumns=50
 
 clearOutVault() {
-    mkdir ~/vaultTempStorage 2> /dev/null
+    mkdir ~/$TempStorageName 2> /dev/null
 
     for file in "$1"/* ;
     do
-        mv "$file" ~/vaultTempStorage/
+        mv "$file" ~/$TempStorageName/
     done
 }
 
 repopulateVault() {
-    mkdir "$1"/tempStorageTransfer 2> /dev/null
 
-    for file in ~/vaultTempStorage/* ;
+    mkdir "$1"/$TempStorageName 2> /dev/null
+
+    for file in ~/"$TempStorageName"/* ;
     do
-        mv "$file" "$1"/tempStorageTransfer/
+        mv "$file" "$1"/$TempStorageName/
     done
 
-    rm -r ~/vaultTempStorage
+    rm -rf ~/$TempStorageName
 }
 
 acknowledgementInitialize() {
     # Initializes the path to both the encrypted vaults and their mount point, if none exist
 
-    if [[ ! -f $1/vaultpath.txt ]];
+    if [[ ! -f $1/$vaultPathText ]];
     then
         VaultPath=$(whiptail --title "Vault Path Error" \
-        --inputbox "No vault path found. Press <Ok> to accept default path, otherwise, enter the path to your ENCRYPTED vaults" \
-        $TerminalLines $TerminalColumns "$HOME/.local/share/plasma-vault/" 3>&1 1>&2 2>&3)
+         --inputbox "No vault path found. Press <Ok> to accept default path, otherwise, enter the path to your ENCRYPTED vaults" \
+         $TerminalLines $TerminalColumns "$HOME/.local/share/plasma-vault/" 3>&1 1>&2 2>&3)
 
-        echo "$VaultPath" > "$1/vaultpath.txt" 
+        echo "$VaultPath" > "$1/$vaultPathText" 
     fi
 
-    if [[ ! -f $1/vaultmount.txt ]];
+    if [[ ! -f $1/$vaultMountText ]];
     then
         VaultMount=$(whiptail --title "Vault Mount Path Error" \
-        --inputbox "No vault mount path found. Press <Ok> to accept default path, otherwise, enter the path you wish to use to MOUNT your vaults" \
-        $TerminalLines $TerminalColumns "$HOME/Vaults/" 3>&1 1>&2 2>&3)
+         --inputbox "No vault mount path found. Press <Ok> to accept default path, otherwise, enter the path you wish to use to MOUNT your vaults" \
+         $TerminalLines $TerminalColumns "$HOME/Vaults/" 3>&1 1>&2 2>&3)
 
-        echo "$VaultMount" > "$1/vaultmount.txt"
+        echo "$VaultMount" > "$1/$vaultMountText"
     fi
 
-    if [[ ! -f $1/passwordshare.txt ]];
+    if [[ ! -f $1/$passwordShareText ]];
     then
-        if whiptail --title "Vault Password Sharing" --yesno "Do all of your vaults share the same password?" $TerminalLines $TerminalColumns 3>&1 1>&2 2>&3;
+        if whiptail --title "Vault Password Sharing" \
+         --yesno "Do all of your vaults share the same password?" \
+         $TerminalLines $TerminalColumns 3>&1 1>&2 2>&3;
+
         then
-            echo "yes" > "$1/passwordshare.txt"
+            echo "yes" > "$1/$passwordShareText"
         else
-            echo "no" > "$1/passwordshare.txt"
+            echo "no" > "$1/$passwordShareText"
         fi
     fi
 }
@@ -66,7 +84,7 @@ prepareVaultList() {
     done
 
     eval "FullVaultPaths=($(whiptail --title "Operations" \
-    --checklist "Select (With <Space>) which vaults you'd like to open"\
+     --checklist "Select (With <Space>) which vaults you'd like to open" \
      $TerminalLines $TerminalColumns $((TerminalLines - 8)) "${VaultCheckMenu[@]}" 3>&1 1>&2 2>&3))"
 }
 
@@ -100,13 +118,15 @@ unlockSelectedVaults() {
 
         if (findmnt | grep "$vaultDestination" > /dev/null);
         then
-            whiptail --title "Vault already mounted" --msgbox "Looks like $vaultDestination has already been mounted." $TerminalLines $TerminalColumns
+            whiptail --title "Vault already mounted" \
+             --msgbox "Looks like $vaultDestination has already been mounted." \
+             $TerminalLines $TerminalColumns
 
         elif [[ -z $vaultProgram ]];
         then
             whiptail --title "Unsupported vault" \
-            --msgbox "This vault is unsupported by this program, or is a regular folder where it shouldn't be. Skipping." \
-            $TerminalLines $TerminalColumns
+             --msgbox "This vault is unsupported by this program, or is a regular folder where it shouldn't be. Skipping." \
+             $TerminalLines $TerminalColumns
 
         else
 
@@ -122,8 +142,8 @@ unlockSelectedVaults() {
                 if [[ -z $VaultPassword || "$PasswordShare" == "no" ]] ;
                 then
                     VaultPassword=$(whiptail --title "Please Enter Password" \
-                    --passwordbox "Please enter the password for a vault, or vaults if you chose the \"shared password\" option." \
-                    $TerminalLines $TerminalColumns "" 3>&1 1>&2 2>&3)
+                     --passwordbox "Please enter the password for a vault, or vaults if you chose the \"shared password\" option." \
+                     $TerminalLines $TerminalColumns "" 3>&1 1>&2 2>&3)
                 fi
 
                 if [[ $vaultProgram == "encfs" ]];
@@ -149,14 +169,6 @@ unlockSelectedVaults() {
     done
 }
 
-shopt -s dotglob
-
-TerminalLines=$(($(tput lines)-5))
-TerminalColumns=$(($(tput cols)-20))
-
-MinimumLines=20
-MinimumColumns=50
-
 if [[ $TerminalLines -lt $MinimumLines ]];
 then
     TerminalLines=$MinimumLines
@@ -169,13 +181,11 @@ fi
 
 timeout 0.2 whiptail --msgbox "" 1 1
 
-vaultConfig="$HOME/.config/vaultHelper"
+acknowledgementInitialize "$vaultConfigPath"
 
-acknowledgementInitialize "$vaultConfig"
-
-read -r PasswordShare < "$vaultConfig/passwordshare.txt"
-read -r VaultPath < "$vaultConfig/vaultpath.txt"
-read -r VaultMount < "$vaultConfig/vaultmount.txt"
+read -r PasswordShare < "$vaultConfigPath/$passwordShareText"
+read -r VaultPath < "$vaultConfigPath/$vaultPathText"
+read -r VaultMount < "$vaultConfigPath/$vaultMountText"
 
 FullVaultPaths=()
 
@@ -194,11 +204,16 @@ do
 
     if [[ $SelectionNumber == 0 ]];
     then
-        whiptail --title "Vault not selected" --msgbox "No vault was selected on the previous page. Please select a vault" $TerminalLines $TerminalColumns
+        whiptail --title "Vault not selected" \
+         --msgbox "No vault was selected on the previous page. Please select a vault" \
+         $TerminalLines $TerminalColumns
+
         prepareVaultList
     fi
 done
 
 unlockSelectedVaults
         
-whiptail --title "Thank you!" --msgbox "Thanks for using this script ^o^ \n Hope it's made your day a bit easier" $TerminalLines $TerminalColumns
+whiptail --title "Thank you!" \
+ --msgbox "Thanks for using this script ^o^ \n Hope it's made your day a bit easier" \
+ $TerminalLines $TerminalColumns
