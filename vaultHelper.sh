@@ -166,6 +166,8 @@ unlockSelectedVaults() {
     done
 }
 
+## TODO: Document and add ability to reconfig through args
+
 if [[ $TerminalLines -lt $MinimumLines ]];
 then
     TerminalLines=$MinimumLines
