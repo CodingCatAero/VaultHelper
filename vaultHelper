@@ -24,7 +24,6 @@ clearOutVault() {
 }
 
 repopulateVault() {
-
     mkdir "$1"/$TempStorageName 2> /dev/null
 
     for file in ~/"$TempStorageName"/* ;
@@ -61,7 +60,6 @@ acknowledgementInitialize() {
         if whiptail --title "Vault Password Sharing" \
          --yesno "Do all of your vaults share the same password?" \
          $TerminalLines $TerminalColumns 3>&1 1>&2 2>&3;
-
         then
             echo "yes" > "$1/$passwordShareText"
         else
@@ -70,6 +68,7 @@ acknowledgementInitialize() {
     fi
 }
 
+# 
 prepareVaultList() {
     VaultCheckMenu=()
 
@@ -96,7 +95,6 @@ unlockSelectedVaults() {
     do
         # ## means to remove the leading substing which matches the supplied regex.
         # %% means to remove the trailing substring which matches the supplued regex.
-
         vaultDestination="${vault##*[[:space:]]}"
         vaultSource="${vault%%\/[[:space:]]*}"
 
@@ -129,7 +127,6 @@ unlockSelectedVaults() {
              $TerminalLines $TerminalColumns
 
         else
-
             if [ -n "$(ls -A "$vaultDestination" 2> /dev/null)" ] ;
             then
                 clearOutVault "$vaultDestination"
@@ -198,7 +195,7 @@ do
     for result in "${FullVaultPaths[@]}";
     do
         FullVaultPaths[SelectionNumber]="$VaultPath$result $VaultMount${result%%.enc/*}"
-
+        
         (( SelectionNumber+=1 ))
     done
 

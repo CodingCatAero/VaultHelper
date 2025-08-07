@@ -1,4 +1,8 @@
 #!/bin/bash
+yesAnswers=("y" "yes" "Y" "YES" "Yes")
+installAnswers=("i" "I" "install" "INSTALL" "Install")
+uninstallAnswers=("u" "U" "uninstall" "UNINSTALL" "Uninstall")
+
 checkFailure() {
     if [[ $1 == 0 ]] ;
     then
@@ -9,29 +13,27 @@ checkFailure() {
 }
 
 askConfirmation() {
-    choice=""
     read -r -p "$1" choice
 
     for option in "${yesAnswers[@]}" ;
     do
         if [[ $option == "$choice" ]] ;
         then
-            return 1
+            choice=1
         fi
     done
 
-    return 0
+    choice=0
 }
 
 askInstallUninstall() {
-    choice=""
     read -r -p "Would you like to [I]nstall, or [U]ninstall VaultHelper? " choice
 
     for option in "${installAnswers[@]}" ;
     do
         if [[ $option == "$choice" ]] ;
         then
-            return 1
+            choice=1
         fi
     done
 
@@ -39,11 +41,11 @@ askInstallUninstall() {
     do
         if [[ $option == "$choice" ]] ;
         then
-            return 2
+            choice=2
         fi
     done
 
-    return 0
+    choice=0
 }
 
 
@@ -88,44 +90,44 @@ uninstallProgram() {
 
     if [[ $? ]] ;
     then
-        
-            if [[ $(askConfirmation "Are you sure you want to uninstall VaultHelper? [y/N] ") == 1 ]] ;
+        askConfirmation "Are you sure you want to uninstall VaultHelper? [y/N] "
+
+        if [[ $choice == 1 ]] ;
+        then
+            askConfirmation "Would you like to clear the config? [y/N] "
+
+            if [[ $choice == 1 ]] ;
             then
-                if [[ $(askConfirmation "Would you like to clear the config? [y/N] ") == 1 ]] ;
+                printf "\nRemoving vaultHelper config from %s/.config/vaultHelper" "$HOME"
+                sudo rm -r "$HOME"/.config/vaultHelper &> /dev/null
+                checkFailure $?
+            fi
+            
+            printf "\n\nRemoving vaultHelper script from %s/.local/bin/vaultHelper" "$HOME"
+            sudo rm "$HOME/.local/bin/vaultHelper" &> /dev/null
+            checkFailure $?
+
+            for dir in "$HOME"/.local/share/icons/hicolor/*/ ;
+            do
+                if [[ $dir =~ ([0-9]+)"x"([0-9]+)"/" ]] ;
                 then
-                    printf "\nRemoving vaultHelper config from %s/.config/vaultHelper" "$HOME"
-                    sudo rm -r "$HOME"/.config/vaultHelper &> /dev/null
+
+                    printf "\n\nRemoving vaultHelper icon from %sapps/" "$dir"
+                    sudo rm "$dir"apps/vaultHelper.png &> /dev/null
                     checkFailure $?
                 fi
-                
-                printf "\n\nRemoving vaultHelper script from %s/.local/bin/vaultHelper" "$HOME"
-                sudo rm "$HOME/.local/bin/vaultHelper" &> /dev/null
-                checkFailure $?
+            done
 
-                for dir in "$HOME"/.local/share/icons/hicolor/*/ ;
-                do
-                    if [[ $dir =~ ([0-9]+)"x"([0-9]+)"/" ]] ;
-                    then
-                        printf "\n\nRemoving vaultHelper icon from %sapps/" "$dir"
-                        sudo rm "$dir"apps/vaultHelper.png &> /dev/null
-                        checkFailure $?
-                    fi
-                done
+            printf "\n\nRemoving vaultHelper desktop file from %s/.local/share/applications/vaultHelper.desktop" "$HOME"
+            sudo rm "$HOME/.local/share/applications/vaultHelper.desktop" &> /dev/null
+            checkFailure $?
 
-                printf "\n\nRemoving vaultHelper desktop file from %s/.local/share/applications/vaultHelper.desktop" "$HOME"
-                sudo rm "$HOME/.local/share/applications/vaultHelper.desktop" &> /dev/null
-                checkFailure $?
-
-                printf "\n\nUninstalled!"
-            fi
+            printf "\n\nUninstalled!"
+        fi
     fi
 }
 
-yesAnswers=("y" "yes" "Y" "YES" "Yes")
-installAnswers=("i" "I" "install" "INSTALL" "Install")
-uninstallAnswers=("u" "U" "uninstall" "UNINSTALL" "Uninstall")
-
-choice=$(askInstallUninstall)
+askInstallUninstall
 
 if [[ $choice == 1 ]] ;
 then
