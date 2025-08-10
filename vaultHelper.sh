@@ -15,25 +15,25 @@ MinimumLines=20
 MinimumColumns=50
 
 clearOutVault() {
-    mkdir ~/$TempStorageName 2> /dev/null
+    mkdir "${HOME:?}"/"$TempStorageName" 2> /dev/null
 
     for file in "$1"/* ;
     do
-        mv "$file" ~/$TempStorageName/
+        mv "$file" "${HOME:?}"/"$TempStorageName"/
         wait
     done
 }
 
 repopulateVault() {
-    mkdir "$1"/$TempStorageName 2> /dev/null
+    mkdir "$1"/"$TempStorageName" 2> /dev/null
 
-    for file in ~/"$TempStorageName"/* ;
+    for file in "${HOME:?}"/"$TempStorageName"/* ;
     do 
-        mv "$file" "$1"/$TempStorageName/
+        mv "$file" "$1"/"$TempStorageName"/
         wait
     done
 
-    rm -rf ~/$TempStorageName
+    rm -rf "${HOME:?}"/"$TempStorageName"
 }
 
 acknowledgementInitialize() {
@@ -160,7 +160,7 @@ unlockSelectedVaults() {
                 fi
             done
 
-            if [[ -d $HOME/vaultTempStorage ]] ;
+            if [[ -d $HOME/$TempStorageName ]] ;
             then
                 repopulateVault "$vaultDestination"
             fi
