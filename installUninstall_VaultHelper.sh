@@ -25,7 +25,7 @@ askConfirmation() {
         fi
     done
 
-    if [[ $choice != 1 ]] ;
+    if [[ $choice == "" ]] ;
     then
         choice=0
     fi
@@ -43,7 +43,7 @@ askInstallUninstall() {
         fi
     done
 
-    if [[ $choice != 1 ]] ;
+    if [[ $choice == "" ]] ;
     then
         for option in "${uninstallAnswers[@]}" ;
         do
@@ -54,7 +54,7 @@ askInstallUninstall() {
         done
     fi
     
-    if [[ $choice != 1 && $choice != 2 ]] ;
+    if [[ $choice == "" ]] ;
     then
         choice=0
     fi    
