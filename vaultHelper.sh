@@ -20,6 +20,7 @@ clearOutVault() {
     for file in "$1"/* ;
     do
         mv "$file" ~/$TempStorageName/
+        wait
     done
 }
 
@@ -27,8 +28,9 @@ repopulateVault() {
     mkdir "$1"/$TempStorageName 2> /dev/null
 
     for file in ~/"$TempStorageName"/* ;
-    do
+    do 
         mv "$file" "$1"/$TempStorageName/
+        wait
     done
 
     rm -rf ~/$TempStorageName
