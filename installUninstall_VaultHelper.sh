@@ -2,6 +2,7 @@
 yesAnswers=("y" "yes" "Y" "YES" "Yes")
 installAnswers=("i" "I" "install" "INSTALL" "Install")
 uninstallAnswers=("u" "U" "uninstall" "UNINSTALL" "Uninstall")
+input=""
 
 checkFailure() {
     if [[ $1 == 0 ]] ;
@@ -13,39 +14,50 @@ checkFailure() {
 }
 
 askConfirmation() {
-    read -r -p "$1" choice
+    read -r -p "$1" input
+    choice=""
 
     for option in "${yesAnswers[@]}" ;
     do
-        if [[ $option == "$choice" ]] ;
+        if [[ $option == "$input" ]] ;
         then
             choice=1
         fi
     done
 
-    choice=0
+    if [[ $choice != 1 ]] ;
+    then
+        choice=0
+    fi
 }
 
 askInstallUninstall() {
-    read -r -p "Would you like to [I]nstall, or [U]ninstall VaultHelper? " choice
+    read -r -p "Would you like to [I]nstall, or [U]ninstall VaultHelper? " input
+    choice=""
 
     for option in "${installAnswers[@]}" ;
     do
-        if [[ $option == "$choice" ]] ;
+        if [[ $option == "$input" ]] ;
         then
             choice=1
         fi
     done
 
-    for option in "${uninstallAnswers[@]}" ;
-    do
-        if [[ $option == "$choice" ]] ;
-        then
-            choice=2
-        fi
-    done
-
-    choice=0
+    if [[ $choice != 1 ]] ;
+    then
+        for option in "${uninstallAnswers[@]}" ;
+        do
+            if [[ $option == "$input" ]] ;
+            then
+                choice=2
+            fi
+        done
+    fi
+    
+    if [[ $choice != 1 && $choice != 2 ]] ;
+    then
+        choice=0
+    fi    
 }
 
 
@@ -54,33 +66,27 @@ installProgram() {
 
     if [[ $? ]] ;
     then
-        printf "Creating %s/.local/bin/" "$HOME"
-        printf "\n"
+        printf "\nCreating %s/.local/bin/\n" "$HOME"
         mkdir "$HOME/.local/bin"
 
         printf "\nDownloading script to %s/.local/bin/" "$HOME"
         curl -s https://raw.githubusercontent.com/CodingCatAero/VaultHelper/refs/heads/main/vaultHelper | sudo tee "$HOME/.local/bin/vaultHelper" &> /dev/null
-        checkFailure $?
 
-        printf "\n\nCreating vaultHelper directory in %s/.config/" "$HOME"
-        printf "\n"
+        printf "\n\nCreating vaultHelper directory in %s/.config/\n" "$HOME"
         mkdir "$HOME/.config/vaultHelper"
 
         printf "\nDownloading icons to %s/.local/share/icons/hicolor" "$HOME"
         curl -s https://raw.githubusercontent.com/CodingCatAero/VaultHelper/refs/heads/main/Assets/iconPack.tar.gz > "$HOME/Downloads/iconPack.tar.gz"
         sudo tar -xf "$HOME/Downloads/iconPack.tar.gz"  --one-top-level="$HOME"/.local/share/icons/hicolor
         rm "$HOME/Downloads/iconPack.tar.gz" &> /dev/null
-        checkFailure $?
 
         printf "\n\nDownloading desktop file to %s/.local/share/applications/" "$HOME"
         curl -s https://raw.githubusercontent.com/CodingCatAero/VaultHelper/refs/heads/main/Assets/vaultHelper.desktop | sudo tee "$HOME/.local/share/applications/vaultHelper.desktop" &> /dev/null
-        checkFailure $?
 
         printf "\n\nSetting read & executable permissions for the script and desktop file"
         sudo chmod 777 "$HOME/.local/bin/vaultHelper" && sudo chmod 777 "$HOME/.local/share/applications/vaultHelper.desktop"
-        checkFailure $?
 
-        printf "\n\nInstalled!!"
+        printf "\n\nDone!!"
     fi
 }
 
@@ -99,13 +105,11 @@ uninstallProgram() {
             if [[ $choice == 1 ]] ;
             then
                 printf "\nRemoving vaultHelper config from %s/.config/vaultHelper" "$HOME"
-                sudo rm -r "$HOME"/.config/vaultHelper &> /dev/null
-                checkFailure $?
+                sudo rm -r "$HOME"/.config/vaultHelper
             fi
             
             printf "\n\nRemoving vaultHelper script from %s/.local/bin/vaultHelper" "$HOME"
-            sudo rm "$HOME/.local/bin/vaultHelper" &> /dev/null
-            checkFailure $?
+            sudo rm "$HOME/.local/bin/vaultHelper"
 
             for dir in "$HOME"/.local/share/icons/hicolor/*/ ;
             do
@@ -113,16 +117,14 @@ uninstallProgram() {
                 then
 
                     printf "\n\nRemoving vaultHelper icon from %sapps/" "$dir"
-                    sudo rm "$dir"apps/vaultHelper.png &> /dev/null
-                    checkFailure $?
+                    sudo rm "$dir"apps/vaultHelper.png
                 fi
             done
 
             printf "\n\nRemoving vaultHelper desktop file from %s/.local/share/applications/vaultHelper.desktop" "$HOME"
-            sudo rm "$HOME/.local/share/applications/vaultHelper.desktop" &> /dev/null
-            checkFailure $?
+            sudo rm "$HOME/.local/share/applications/vaultHelper.desktop"
 
-            printf "\n\nUninstalled!"
+            printf "\n\nDone!!"
         fi
     fi
 }
